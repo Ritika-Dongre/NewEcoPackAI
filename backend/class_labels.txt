@@ -1,0 +1,32 @@
+Biscuits
+Bracelet
+Bulb
+Calculators
+Drawing_colors
+Drones
+DryFruits
+Flow_Wrap_chocolates_Toffees
+Footwear
+Fountain_pen
+Handbag &luggage
+Headphones
+Home_decor
+Input_devices
+Lamp
+Laptops
+Mobile phones
+Necklace
+Notebook
+Remotes
+Ring
+Router
+Small_stationary
+Snacks
+Telephone
+Twist_Wrap_Toffees
+Watches
+camera
+chocolates
+clothing_fashion
+cosmetic_bottle
+cosmetic_tube
