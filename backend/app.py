@@ -1,153 +1,167 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS   # ✅ FIX: import CORS
 import tensorflow as tf
-from tensorflow.keras.preprocessing import image_dataset_from_directory
-from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-import pickle
+import numpy as np
+from tensorflow.keras.preprocessing import image
 import os
 
-# ==============================
-# CONFIG
-# ==============================
-DATASET_DIR = "dataset"
-BATCH_SIZE = 32
-IMG_SIZE = (224, 224)
-EPOCHS = 50
-FINE_TUNE_EPOCHS = 10
-MODEL_DIR = "saved_model/my_model"
+# ---------------------------
+# Flask App Setup
+# ---------------------------
+app = Flask(__name__)
+CORS(app)  # ✅ Allow cross-origin (for React frontend)
 
-os.makedirs(MODEL_DIR, exist_ok=True)
+# ---------------------------
+# Load Model
+# ---------------------------
+MODEL_PATH = "saved_model/my_model.keras"
+model = tf.keras.models.load_model(MODEL_PATH)
 
-# ==============================
-# LOAD DATASETS
-# ==============================
-train_ds = image_dataset_from_directory(
-    DATASET_DIR,
-    validation_split=0.2,
-    subset="training",
-    seed=123,
-    image_size=IMG_SIZE,
-    batch_size=BATCH_SIZE
-)
-
-val_ds = image_dataset_from_directory(
-    DATASET_DIR,
-    validation_split=0.2,
-    subset="validation",
-    seed=123,
-    image_size=IMG_SIZE,
-    batch_size=BATCH_SIZE
-)
-
-class_names = train_ds.class_names
-NUM_CLASSES = len(class_names)
-print(f"Found {NUM_CLASSES} classes: {class_names}")
-
-# Save class labels for Flask
-with open(os.path.join(MODEL_DIR, "class_labels.txt"), "w") as f:
-    for name in class_names:
-        f.write(name + "\n")
-
-# ==============================
-# DATA AUGMENTATION & NORMALIZATION
-# ==============================
-data_augmentation = tf.keras.Sequential([
-    tf.keras.layers.Rescaling(1./127.5, offset=-1),  # scale [-1,1]
-    tf.keras.layers.RandomFlip("horizontal"),
-    tf.keras.layers.RandomRotation(0.2),
-    tf.keras.layers.RandomZoom(0.2),
-    tf.keras.layers.RandomContrast(0.2),
-    tf.keras.layers.RandomTranslation(0.1, 0.1),
-])
-
-# ==============================
-# OPTIMIZE PERFORMANCE
-# ==============================
-AUTOTUNE = tf.data.AUTOTUNE
-train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
-val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
-
-# ==============================
-# BASE MODEL
-# ==============================
-base_model = MobileNetV2(weights="imagenet", include_top=False, input_shape=(224, 224, 3))
-base_model.trainable = False  # Freeze backbone
-
-inputs = tf.keras.Input(shape=(224, 224, 3))
-x = data_augmentation(inputs)
-x = base_model(x, training=False)
-x = GlobalAveragePooling2D()(x)
-x = Dropout(0.5)(x)
-outputs = Dense(NUM_CLASSES, activation="softmax")(x)
-model = Model(inputs, outputs)
-
-# ==============================
-# COMPILE
-# ==============================
-model.compile(
-    optimizer=Adam(learning_rate=0.0005),
-    loss="sparse_categorical_crossentropy",
-    metrics=["accuracy"]
-)
-
-# ==============================
-# CALLBACKS
-# ==============================
-initial_callbacks = [
-    tf.keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True),
-    tf.keras.callbacks.ModelCheckpoint(os.path.join(MODEL_DIR, "best_model_initial.keras"), save_best_only=True)
+# ---------------------------
+# Categories
+# ---------------------------
+class_labels = [
+    # Jewelry
+    "Ring", "Necklace", "Bracelet", "Earrings",
+    # Clothing
+    "Shirt", "TShirt", "Pants", "Lower", "Sweater", "Hoodies",
+    "Shorts", "Skirt", "Dress", "Gown", "Jacket", "JacketDenim",
+    "Blazer", "Coat", "Saree", "Kurti", "Scarf", "Legging",
+    # Footwear
+    "Boots", "Sneakers", "Formal_Shoes", "Sandals", "FlipFlops", "Ballet_Flat",
+    # Watches
+    "Wristwatch", "Digital_Watch",
+    # Separate
+    "Hat", "Belt"
 ]
 
-# ==============================
-# TRAIN
-# ==============================
-print("\n>>> Starting initial training (feature extraction) ...")
-history = model.fit(
-    train_ds,
-    validation_data=val_ds,
-    epochs=EPOCHS,
-    callbacks=initial_callbacks
-)
+# ---------------------------
+# Packaging Suggestions
+# ---------------------------
+packaging_suggestions = {
+    # Jewelry
+    "Ring": {
+        "internal": {"material": "Hemp or organic cotton pouch", "reason": "Reusable, soft and biodegradable"},
+        "external": {"material": "Small wooden or recycled cardboard box", "reason": "Eco-friendly and repurposable"}
+    },
+    "Necklace": {
+        "internal": {"material": "Recycled paper card or cotton pad", "reason": "Prevents tangling & biodegradable"},
+        "external": {"material": "Small cardboard box with linen ribbon", "reason": "Elegant & recyclable"}
+    },
+    "Bracelet": {
+        "internal": {"material": "Organic cotton pouch or jute wrap", "reason": "Protects bracelet without plastic"},
+        "external": {"material": "Recycled kraft paper box", "reason": "Strong, protective & eco-friendly"}
+    },
+    "Earrings": {
+        "internal": {"material": "Recycled paper holder", "reason": "Keeps pair together & avoids loss"},
+        "external": {"material": "Small recycled cardboard box", "reason": "Minimal, sustainable & secure"}
+    },
 
-# Save final model for Flask
-model.save(MODEL_DIR)
-print(f"Final model saved in {MODEL_DIR}")
+    # Footwear
+    "casual_lightweight": {
+        "internal": {"material": "Recycled tissue or cloth bag", "reason": "Light protection for casual footwear"},
+        "external": {"material": "Thin recycled cardboard box", "reason": "Compact, eco-friendly & stackable"}
+    },
+    "premium_heavy": {
+        "internal": {"material": "Recycled paper stuffing or cloth wrap", "reason": "Strong support for premium shoes"},
+        "external": {"material": "Thick recycled cardboard shoe box", "reason": "Durable, protective & sustainable"}
+    },
 
-# Save training history
-with open(os.path.join(MODEL_DIR, "history_initial.pkl"), "wb") as f:
-    pickle.dump(history.history, f)
-print("Initial training history saved.")
+    # Clothing
+    "FlatClothing": {
+        "internal": {"material": "Recycled tissue paper", "reason": "Prevents wrinkles during fold packaging"},
+        "external": {"material": "Compostable mailer or recycled polybag", "reason": "Durable and biodegradable"}
+    },
+    "HangerClothing": {
+        "internal": {"material": "Biodegradable garment cover", "reason": "Keeps garment dust-free"},
+        "external": {"material": "Recycled kraft garment box", "reason": "Provides safe shipping & eco-friendly"}
+    },
 
-# ==============================
-# OPTIONAL FINE-TUNE
-# ==============================
-print("\n>>> Starting optional fine-tuning ...")
-base_model.trainable = True
-for layer in base_model.layers[:-30]:  # unfreeze last 30 layers
-    layer.trainable = False
+    # Watches
+    "Wristwatch": {
+        "internal": {"material": "Organic cotton cushion", "reason": "Protects dial and strap"},
+        "external": {"material": "Recycled cardboard or wooden box", "reason": "Durable, reusable & stylish"}
+    },
+    "Digital_Watch": {
+        "internal": {"material": "Cotton pouch", "reason": "Simple, scratch-free eco option"},
+        "external": {"material": "Small recycled cardboard box", "reason": "Affordable & recyclable"}
+    },
 
-model.compile(
-    optimizer=Adam(learning_rate=1e-5),
-    loss="sparse_categorical_crossentropy",
-    metrics=["accuracy"]
-)
+    # Separate
+    "Hat": {
+        "internal": {"material": "Recycled paper stuffing", "reason": "Maintains hat shape"},
+        "external": {"material": "Large recycled cardboard box", "reason": "Prevents crushing during shipping"}
+    },
+    "Belt": {
+        "internal": {"material": "Recycled kraft paper wrap", "reason": "Prevents scratches on leather"},
+        "external": {"material": "Slim recycled cardboard box", "reason": "Compact & recyclable"}
+    }
+}
 
-fine_tune_callbacks = [
-    tf.keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True),
-    tf.keras.callbacks.ModelCheckpoint(os.path.join(MODEL_DIR, "best_model_fine_tuned.keras"), save_best_only=True)
-]
+# ---------------------------
+# Groups Mapping
+# ---------------------------
+flat_clothing = ["Shirt", "TShirt", "Pants", "Lower", "Sweater", "Hoodies", "Shorts", "Skirt", "Dress", "Gown", "Kurti", "Legging"]
+hanger_clothing = ["Jacket", "JacketDenim", "Blazer", "Coat", "Saree", "Scarf"]
+casual_lightweight = ["Sandals", "FlipFlops", "Ballet_Flat", "Sneakers"]
+premium_heavy = ["Boots", "Formal_Shoes"]
 
-fine_tune_history = model.fit(
-    train_ds,
-    validation_data=val_ds,
-    epochs=FINE_TUNE_EPOCHS,
-    callbacks=fine_tune_callbacks
-)
+# ---------------------------
+# Preprocessing
+# ---------------------------
+def preprocess(img_path):
+    img = image.load_img(img_path, target_size=(224, 224))
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    # ✅ Match MobileNetV2 training preprocessing
+    return img_array / 127.5 - 1.0
 
-model.save(os.path.join(MODEL_DIR, "fine_tuned_model.keras"))
-print("Fine-tuned model saved.")
+# ---------------------------
+# API Endpoint
+# ---------------------------
+@app.route('/classify', methods=['POST'])
+def classify():
+    if 'file' not in request.files:   # ✅ use "file" (consistent with React)
+        return jsonify({"error": "No image uploaded"}), 400
 
-with open(os.path.join(MODEL_DIR, "history_fine_tuned.pkl"), "wb") as f:
-    pickle.dump(fine_tune_history.history, f)
-print("Fine-tuning history saved.")
+    file = request.files['file']
+    filepath = os.path.join("uploads", file.filename)
+    file.save(filepath)
+
+    img_array = preprocess(filepath)
+    preds = model.predict(img_array)
+    predicted_class_idx = np.argmax(preds, axis=1)[0]
+    confidence = float(np.max(preds))
+
+    # Safe class label
+    predicted_label = class_labels[predicted_class_idx] if predicted_class_idx < len(class_labels) else "Unknown"
+
+    # Assign packaging type
+    if predicted_label in flat_clothing:
+        suggestion = packaging_suggestions["FlatClothing"]
+    elif predicted_label in hanger_clothing:
+        suggestion = packaging_suggestions["HangerClothing"]
+    elif predicted_label in casual_lightweight:
+        suggestion = packaging_suggestions["casual_lightweight"]
+    elif predicted_label in premium_heavy:
+        suggestion = packaging_suggestions["premium_heavy"]
+    elif predicted_label in packaging_suggestions:
+        suggestion = packaging_suggestions[predicted_label]
+    else:
+        suggestion = {
+            "internal": {"material": "N/A", "reason": "No suggestion available"},
+            "external": {"material": "N/A", "reason": "No suggestion available"}
+        }
+
+    return jsonify({
+        "product_type": predicted_label,
+        "prediction_accuracy": round(confidence, 2),
+        "packaging_suggestion": suggestion
+    })
+
+# ---------------------------
+# Run Server
+# ---------------------------
+if __name__ == "__main__":
+    os.makedirs("uploads", exist_ok=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
