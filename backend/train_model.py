@@ -11,10 +11,10 @@ import os
 # CONFIG
 # ==============================
 DATASET_DIR = "dataset"
-BATCH_SIZE = 16        # smaller batch size
+BATCH_SIZE = 16
 IMG_SIZE = (224, 224)
-EPOCHS = 30
-FINE_TUNE_EPOCHS = 10
+EPOCHS = 12           # Reduced for feature extraction
+FINE_TUNE_EPOCHS = 6 
 SAVE_DIR = "saved_model"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
