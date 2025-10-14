@@ -18,7 +18,7 @@ It balances **sustainability, durability, and cost-effectiveness** to help indus
 
 ## 🎯 Problem Statement
 
-> Businesses often lack awareness or tools to compare and choose eco-friendly packaging alternatives, leading to increased plastic waste and unsustainable practices.  
+Businesses often lack awareness or tools to compare and choose eco-friendly packaging alternatives, leading to increased plastic waste and unsustainable practices.  
 EcoPackAI solves this by offering an **AI-based web tool** that recommends optimal eco-materials with data-driven insights on cost and environmental impact.
 
 ---
@@ -34,17 +34,17 @@ EcoPackAI solves this by offering an **AI-based web tool** that recommends optim
 
 ## Installation Guide
 
-1️⃣ **Clone the Repository
+1️⃣ **Clone the Repository**
 
--git clone https://github.com/Ritika-Dongre/NewEcoPackAI.git
--cd NewEcoPackAI
+- git clone https://github.com/Ritika-Dongre/NewEcoPackAI.git
+- cd NewEcoPackAI
 
-2️⃣ **Backend Setup
+2️⃣ **Backend Setup**
 
--cd backend
--pip install -r requirements.txt
--python app.py
+- cd backend
+- pip install -r requirements.txt
+- python app.py
 
-2️⃣ **Frontend Setup
--cd frontend
--npm start
+2️⃣ **Frontend Setup**
+- cd frontend
+- npm start
