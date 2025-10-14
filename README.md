@@ -34,16 +34,17 @@ EcoPackAI solves this by offering an **AI-based web tool** that recommends optim
 
 ## Installation Guide
 
-# 1️⃣ Clone the Repository
+1️⃣ Clone the Repository
 
 git clone https://github.com/Ritika-Dongre/NewEcoPackAI.git
 cd NewEcoPackAI
-# 2️⃣ Backend Setup
+
+2️⃣ Backend Setup
 
 cd backend
 pip install -r requirements.txt
 python app.py
 
-# 2️⃣ Frontend Setup
+2️⃣ Frontend Setup
 cd frontend
 npm start
