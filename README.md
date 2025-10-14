@@ -32,15 +32,18 @@ EcoPackAI solves this by offering an **AI-based web tool** that recommends optim
 - 📩 **Email Alerts:** Sends material recommendations and sustainability tips.  
 - 🔐 **Admin Panel:** Manage packaging database and user data.  
 
- Installation Guide
+## Installation Guide
 
-### 1️⃣ Clone the Repository
-```bash
+# 1️⃣ Clone the Repository
+
 git clone https://github.com/Ritika-Dongre/NewEcoPackAI.git
 cd NewEcoPackAI
-2️⃣ Backend Setup
-bash
-Copy code
+# 2️⃣ Backend Setup
+
 cd backend
 pip install -r requirements.txt
 python app.py
+
+# 2️⃣ Frontend Setup
+cd frontend
+npm start
