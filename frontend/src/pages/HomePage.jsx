@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { HiMenu, HiX } from "react-icons/hi";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
     const [menuOpen, setMenuOpen] = useState(false);
+    const navigate = useNavigate(); // hook for navigation
 
     const scrollToSection = (id) => {
         const element = document.getElementById(id);
@@ -13,10 +15,12 @@ const HomePage = () => {
         }
     };
 
-    return (
-        <div className="w-full min-h-screen bg-gradient-to-b from-green-50 to-white font-sans overflow-x-hidden">
+    const videoSource = "/videos/EcoPackaging.mov";
 
-            {/* Navbar */}
+    return (
+        <div className="w-full min-h-screen bg-gradient-to-b from-green-50 to-white font-sans overflow-x-hidden-hidden">
+
+            {/* Navbar (Unchanged) */}
             <nav className="w-full bg-green-50 shadow-md fixed top-0 left-0 z-50">
                 <div className="max-w-7xl mx-auto px-8 md:px-20 flex items-center justify-between h-20">
                     <div className="flex items-center space-x-3 cursor-pointer">
@@ -45,7 +49,6 @@ const HomePage = () => {
                     </div>
                 </div>
 
-                {/* Mobile Menu */}
                 {menuOpen && (
                     <div className="md:hidden bg-green-50 shadow-md px-4 py-4 flex flex-col space-y-4 text-green-700 font-semibold">
                         <li onClick={() => scrollToSection("hero")} className="cursor-pointer hover:text-green-900">Home</li>
@@ -54,9 +57,20 @@ const HomePage = () => {
                     </div>
                 )}
             </nav>
-
-            {/* Hero Section */}
-            <section id="hero" className="flex flex-col md:flex-row items-center justify-between px-8 md:px-20 py-32 pt-36 bg-green-50 rounded-b-3xl shadow-xl relative overflow-hidden">
+            <section id="hero" className="flex flex-col md:flex-row items-center justify-between px-8 md:px-20 h-screen pt-20 relative overflow-hidden">
+                
+                {/* 1. VIDEO ELEMENT - Full Background */}
+                <video 
+                    autoPlay 
+                    loop 
+                    muted 
+                    playsInline 
+                    className="absolute inset-0 w-full h-full object-cover z-0 opacity-20" 
+                    aria-label="Background animation of eco-friendly packaging"
+                >
+                    <source src={videoSource} type="video/mp4" /> 
+                    Your browser does not support the video tag.
+                </video>
                 <motion.div className="md:w-1/2 space-y-6 z-10 text-center md:text-left" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1 }}>
                     <h1 className="text-3xl md:text-5xl font-bold text-green-900 leading-tight">
                         Welcome to <span className="text-green-600">EcoPack AI</span>
@@ -65,32 +79,49 @@ const HomePage = () => {
                         Revolutionizing packaging with AI-driven eco-friendly solutions. Reduce waste, save resources, and make a positive impact on our planet.
                     </p>
                     <div className="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4 justify-center md:justify-start">
-                        <button className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 hover:bg-green-700 transition duration-300">Get Started</button>
-                        <button className="bg-white text-green-600 border-2 border-green-600 px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 hover:bg-green-50 transition duration-300">Learn More</button>
+                        <button
+                            onClick={() => navigate("/get-started")}
+                            className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 hover:bg-green-700 transition duration-300"
+                        >
+                            Get Started
+                        </button>
+                        <button
+                            onClick={() => navigate("/learn-more")}
+                            className="bg-white text-green-600 border-2 border-green-600 px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 hover:bg-green-50 transition duration-300"
+                        >
+                            Learn More
+                        </button>
                     </div>
                 </motion.div>
 
                 <motion.div className="md:w-1/2 mt-10 md:mt-0 z-10 flex justify-center" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1 }}>
-                    <img src="/images/image.png" alt="Eco Packaging" className="rounded-3xl shadow-2xl hover:scale-105 transform transition duration-500 w-full max-w-md" />
+                    <img 
+                      src="/images/image.png"
+                      alt="Eco Packaging Mockup" 
+                      className="rounded-3xl shadow-2xl hover:scale-105 transform transition duration-500 w-full max-w-md hidden md:block" // Optional: Keep a mockup image
+                    />
                 </motion.div>
-
-                {/* Background Shapes */}
                 <div className="absolute top-0 left-0 w-40 h-40 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
                 <div className="absolute bottom-0 right-0 w-56 h-56 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
             </section>
 
-            {/* Features Section */}
-            <section className="px-8 md:px-20 py-20 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                {[
-                    { title: "AI-Powered Analysis", description: "Smart recommendations for sustainable packaging based on AI insights." },
-                    { title: "Eco-Friendly Materials", description: "Discover biodegradable, recyclable, and reusable packaging options." },
-                    { title: "Track & Reduce Waste", description: "Monitor packaging impact and optimize for minimal environmental footprint." },
-                ].map((feature, idx) => (
-                    <motion.div key={idx} className="bg-white p-6 md:p-8 rounded-3xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition duration-500" initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: idx * 0.2 }}>
-                        <h2 className="text-xl md:text-2xl font-semibold text-green-700 mb-2 md:mb-4">{feature.title}</h2>
-                        <p className="text-gray-600 text-sm md:text-md">{feature.description}</p>
-                    </motion.div>
-                ))}
+            {/* Features Section  */}
+            <section className="bg-green-50 py-20 px-8 md:px-20 text-center">
+                <h2 className="text-2xl md:text-4xl font-bold text-green-800 mb-12">
+                    Features
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {[
+                        { title: "AI-Powered Analysis", description: "Smart recommendations for sustainable packaging based on AI insights." },
+                        { title: "Eco-Friendly Materials", description: "Discover biodegradable, recyclable, and reusable packaging options." },
+                        { title: "Track & Reduce Waste", description: "Monitor packaging impact and optimize for minimal environmental footprint." },
+                    ].map((feature, idx) => (
+                        <motion.div key={idx} className="bg-white p-6 md:p-8 rounded-3xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition duration-500" initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: idx * 0.2 }}>
+                            <h2 className="text-xl md:text-2xl font-semibold text-green-700 mb-2 md:mb-4">{feature.title}</h2>
+                            <p className="text-gray-600 text-sm md:text-md">{feature.description}</p>
+                        </motion.div>
+                    ))}
+                </div>
             </section>
 
             {/* How It Works Section */}
@@ -151,17 +182,17 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* Call to Action */}
-            <motion.section className="bg-green-600 text-white py-24 text-center relative overflow-hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
+            {/* Call to Action  */}
+            <motion.section className="bg-green-600 text-white py-20 text-center relative overflow-hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
                 <h2 className="text-2xl md:text-4xl font-bold mb-4">Ready to Make a Difference?</h2>
                 <p className="text-sm md:text-lg mb-6">Join us in creating smarter, sustainable packaging solutions.</p>
-                <button className="bg-white text-green-600 px-6 md:px-10 py-2 md:py-4 rounded-lg font-semibold shadow-lg transform hover:scale-105 hover:bg-green-50 transition duration-300">
+                <button className="bg-white text-green-600 px-4 md:px-8 py-1 md:py-2 rounded-lg font-semibold shadow-lg transform hover:scale-105 hover:bg-green-50 transition duration-300">
                     Try EcoPack AI Now
                 </button>
             </motion.section>
 
-            {/* Footer */}
-            <footer className="bg-green-800 text-white py-12 px-8 md:px-20 text-center">
+            {/* Footer (Unchanged) */}
+            <footer className="bg-green-800 text-white py-6 px-8 md:px-20 text-center">
                 <p>© 2025 EcoPack AI. All rights reserved.</p>
             </footer>
 
