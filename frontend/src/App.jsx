@@ -6,6 +6,9 @@ import UploadPage from "./pages/UploadPage.jsx";
 import GetStartedPage from "./pages/GetStartedPage";
 import LearnMorePage from "./pages/LearnMorePage";
 import SustainabilityPage from "./pages/SustainabilityPage";
+import SignupPage from "./pages/signup.jsx";
+import LoginPage from "./pages/login.jsx";
+
 
 function App() {
   return (
@@ -16,6 +19,8 @@ function App() {
         <Route path="/get-started" element={<GetStartedPage />} />
         <Route path="/learn-more" element={<LearnMorePage />} />
         <Route path="/sustainability" element={<SustainabilityPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </Router>
   );

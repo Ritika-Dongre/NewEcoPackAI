@@ -38,7 +38,7 @@ const HomePage = () => {
                     <ul className="hidden md:flex space-x-8 text-green-700 font-semibold">
                         <li className="hover:text-green-900 cursor-pointer transition" onClick={() => scrollToSection("hero")}>Home</li>
                         <li className="hover:text-green-900 cursor-pointer transition" onClick={() => scrollToSection("about")}>About</li>
-                        <li className="hover:text-green-900 cursor-pointer transition">Login/Signup</li>
+                        <li className="hover:text-green-900 cursor-pointer transition" onClick={() => navigate("/login")}>Login/SignUp</li>
                     </ul>
 
                     {/* Mobile Menu Button */}
