@@ -20,7 +20,7 @@ const UploadPage = () => {
     }
   };
 
-  // Handle file upload to backend
+  // Upload to backend
   const handleUpload = async () => {
     if (!file) {
       alert("Please select an image first");
@@ -28,18 +28,21 @@ const UploadPage = () => {
     }
 
     const formData = new FormData();
-    formData.append("file", file); // Backend expects "file"
+    formData.append("file", file);
 
     try {
-      const response = await axios.post("http://localhost:5000/classify", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:5000/classify",  // ✅ Updated URL
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
-      setResult(response.data); // Save backend response
+      setResult(response.data);
       setError(null);
+
     } catch (err) {
-      console.error("Upload error:", err.response?.data || err.message);
-      setError(err.response?.data?.error || "Upload failed");
+      console.error("Upload error:", err);
+      setError("Backend connection failed. Is Flask running?");
     }
   };
 
@@ -61,29 +64,19 @@ const UploadPage = () => {
 
           {result && (
             <div className="profile-details">
-              <h3>Type: {result.product_type}</h3>
-              <p>
-                <strong>Prediction Accuracy:</strong> {result.prediction_accuracy}
-              </p>
+              <h3>Product Type: {result.product_type}</h3>
+              <p><strong>Accuracy:</strong> {result.prediction_accuracy}</p>
 
-              <p>
-                <strong>Internal Packaging:</strong> {result.packaging_suggestion?.internal?.material || "N/A"}
-              </p>
-              <p>
-                <em>{result.packaging_suggestion?.internal?.reason || "N/A"}</em>
-              </p>
+              <h4>Internal Packaging:</h4>
+              <p>{result.packaging_suggestion?.internal?.material}</p>
+              <em>{result.packaging_suggestion?.internal?.reason}</em>
 
-              <p>
-                <strong>External Packaging:</strong> {result.packaging_suggestion?.external?.material || "N/A"}
-              </p>
-              <p>
-                <em>{result.packaging_suggestion?.external?.reason || "N/A"}</em>
-              </p>
+              <h4>External Packaging:</h4>
+              <p>{result.packaging_suggestion?.external?.material}</p>
+              <em>{result.packaging_suggestion?.external?.reason}</em>
 
               {result.product_type === "Uncertain" && (
-                <p className="warning-text">
-                   Model is unsure about this product
-                </p>
+                <p className="warning-text">⚠ Model not confident</p>
               )}
             </div>
           )}
