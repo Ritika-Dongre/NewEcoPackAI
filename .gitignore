@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+
+# Backend generated artifacts
+backend/uploads/
+backend/history/
+backend/feedback/
+backend/saved_model/
+saved_model/
+*.keras
+*.pkl
+
+# Node / React
+frontend/node_modules/
+frontend/build/
+frontend/.cache/
+frontend/node_modules/.cache/
+
+# OS/editor
+.DS_Store
+Thumbs.db

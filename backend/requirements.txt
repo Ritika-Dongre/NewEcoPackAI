@@ -7,4 +7,5 @@ fastapi
 uvicorn
 
 flask-cors
+pymongo>=4.6.0
 

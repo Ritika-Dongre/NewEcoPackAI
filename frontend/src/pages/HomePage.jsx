@@ -39,6 +39,8 @@ const HomePage = () => {
                         <li className="hover:text-green-900 cursor-pointer transition" onClick={() => scrollToSection("hero")}>Home</li>
                         <li className="hover:text-green-900 cursor-pointer transition" onClick={() => scrollToSection("about")}>About</li>
                         <li className="hover:text-green-900 cursor-pointer transition" onClick={() => navigate("/login")}>Login/SignUp</li>
+                        <li className="hover:text-green-900 cursor-pointer transition" onClick={() => navigate("/upload")}>Upload</li>
+
                     </ul>
 
                     {/* Mobile Menu Button */}
