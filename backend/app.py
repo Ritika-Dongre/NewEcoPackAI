@@ -5,6 +5,7 @@ import numpy as np
 from tensorflow.keras.preprocessing import image
 import os
 import json
+from pathlib import Path
 from copy import deepcopy
 from datetime import datetime, timezone
 from pymongo import MongoClient, ASCENDING
@@ -16,8 +17,31 @@ CORS(app)
 # =====================================================
 # Load Model & Labels
 # =====================================================
-MODEL_PATH = "saved_model/my_model.keras"
-LABEL_FILE = "saved_model/class_labels.txt"
+BACKEND_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BACKEND_DIR.parent
+
+def resolve_artifact_path(relative_path, env_var_name):
+    env_path = os.getenv(env_var_name, "").strip()
+    if env_path:
+        candidate = Path(env_path)
+        if not candidate.is_absolute():
+            candidate = PROJECT_ROOT / candidate
+        return candidate.resolve()
+
+    # Prefer project-root artifacts, then fall back to backend-local artifacts.
+    project_candidate = (PROJECT_ROOT / relative_path).resolve()
+    if project_candidate.exists():
+        return project_candidate
+
+    backend_candidate = (BACKEND_DIR / relative_path).resolve()
+    if backend_candidate.exists():
+        return backend_candidate
+
+    # Keep a deterministic default path for clearer startup logs/errors.
+    return project_candidate
+
+MODEL_PATH = str(resolve_artifact_path("saved_model/my_model.keras", "MODEL_PATH"))
+LABEL_FILE = str(resolve_artifact_path("saved_model/class_labels.txt", "LABEL_FILE"))
 CONFIDENCE_THRESHOLD = float(os.getenv("PREDICTION_THRESHOLD", "0.35"))
 TOP_K = int(os.getenv("TOP_K_PREDICTIONS", "3"))
 

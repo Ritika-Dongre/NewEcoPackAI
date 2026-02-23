@@ -8,6 +8,8 @@ import LearnMorePage from "./pages/LearnMorePage";
 import SustainabilityPage from "./pages/SustainabilityPage";
 import SignupPage from "./pages/signup.jsx";
 import LoginPage from "./pages/login.jsx";
+import HistoryPage from "./pages/HistoryPage.jsx";
+import VendorsPage from "./pages/VendorsPage.jsx";
 
 
 function App() {
@@ -21,6 +23,8 @@ function App() {
         <Route path="/sustainability" element={<SustainabilityPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/history" element={<HistoryPage />} />
+        <Route path="/vendors" element={<VendorsPage />} />
       </Routes>
     </Router>
   );
