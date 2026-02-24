@@ -160,7 +160,7 @@ const HomePage = () => {
                         <p className="text-gray-700 text-sm md:text-md">
                             <strong>Why Choose EcoPack AI?</strong> We combine data-driven AI analysis with biodegradable, recyclable, and reusable materials. This helps businesses minimize environmental impact while maximizing efficiency.
                         </p>
-                        <p className="text-gray-700 text-sm md:text-md">
+                        <div className="text-gray-700 text-sm md:text-md">
                             <strong>Key Benefits:</strong>
                             <ul className="list-disc ml-6 mt-2 space-y-1 text-gray-600">
                                 <li>Reduce plastic and packaging waste.</li>
@@ -168,7 +168,7 @@ const HomePage = () => {
                                 <li>Boost brand reputation with sustainable practices.</li>
                                 <li>Track and measure environmental impact.</li>
                             </ul>
-                        </p>
+                        </div>
                         <p className="text-gray-700 text-sm md:text-md">
                             With EcoPack AI, packaging smarter isn’t just an option — it’s a responsibility to the planet and your customers.
                         </p>

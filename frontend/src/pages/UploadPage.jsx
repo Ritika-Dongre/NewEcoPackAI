@@ -1,10 +1,12 @@
 // UploadPage.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
 
 const UploadPage = () => {
+  const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [previewURL, setPreviewURL] = useState(null);
   const [result, setResult] = useState(null);
@@ -20,9 +22,7 @@ const UploadPage = () => {
   const [moistureSensitive, setMoistureSensitive] = useState("no");
   const [shippingDistance, setShippingDistance] = useState("local");
   const [budgetPriority, setBudgetPriority] = useState("balanced");
-  const [historyItems, setHistoryItems] = useState([]);
   const [historySummary, setHistorySummary] = useState(null);
-  const [historyFilter, setHistoryFilter] = useState("all");
 
   // Handle file selection
   const handleChange = (e) => {
@@ -66,7 +66,14 @@ const UploadPage = () => {
       fetchHistory();
     } catch (err) {
       console.error("Upload error:", err);
-      setError("Backend connection failed. Please make sure Flask is running.");
+      const backendMessage =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        null;
+      setError(
+        backendMessage ||
+          "Backend connection failed. Please make sure Flask is running."
+      );
     } finally {
       setLoading(false);
     }
@@ -98,11 +105,10 @@ const UploadPage = () => {
 
   const fetchHistory = async () => {
     try {
-      const [historyRes, summaryRes] = await Promise.all([
+      const [, summaryRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/history?limit=8`),
         axios.get(`${API_BASE_URL}/history/summary`),
       ]);
-      setHistoryItems(historyRes.data?.items || []);
       setHistorySummary(summaryRes.data || null);
     } catch (err) {
       console.error("History fetch error:", err);
@@ -112,13 +118,6 @@ const UploadPage = () => {
   useEffect(() => {
     fetchHistory();
   }, []);
-
-  const filteredHistoryItems = historyItems.filter((item) => {
-    if (historyFilter === "all") return true;
-    if (historyFilter === "uncertain") return item.product_type === "Uncertain";
-    if (historyFilter === "high_confidence") return (item.prediction_accuracy || 0) >= 0.8;
-    return true;
-  });
 
   const handleExportReport = () => {
     if (!result) return;
@@ -228,23 +227,60 @@ const UploadPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 p-6">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center transition-all hover:shadow-2xl">
-        <h1 className="text-3xl font-bold text-green-700 mb-1">Eco Pack AI</h1>
-        <p className="text-gray-600 mb-6">Sustainable Packaging Suggestions</p>
+    <div
+      className="min-h-screen px-4 py-6 sm:px-6 lg:px-10"
+      style={{
+        backgroundImage: "url('/images/background.webp')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        fontFamily: "'Segoe UI', 'Trebuchet MS', sans-serif",
+      }}
+    >
+      <div className="mx-auto max-w-7xl rounded-3xl border border-emerald-100 bg-white/90 p-4 shadow-sm backdrop-blur-md sm:p-6">
+        <div className="mb-6 flex flex-col gap-3 text-left sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.24em] text-emerald-700">EcoPack AI</p>
+            <h1 className="mt-1 text-2xl font-semibold text-emerald-900 sm:text-3xl">Packaging Intelligence Workspace</h1>
+            <p className="mt-1 text-sm text-slate-600">
+              Upload a product image, customize delivery context, and compare packaging strategies.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 self-start">
+            <button
+              type="button"
+              onClick={() => navigate("/vendors")}
+              className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100"
+            >
+              View Vendors
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/history")}
+              className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100"
+            >
+              View History
+            </button>
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-12">
+          <section className="lg:col-span-4 rounded-2xl border border-emerald-100 bg-white p-4 text-left shadow-sm sm:p-5 lg:sticky lg:top-6 lg:h-fit">
+            <h2 className="text-lg font-semibold text-emerald-900">Upload and Context</h2>
+            <p className="mt-1 text-sm text-slate-600">Provide input data for better recommendations.</p>
 
         <label
           htmlFor="fileInput"
-          className="block border-2 border-dashed border-green-400 rounded-xl p-6 cursor-pointer hover:bg-green-100 transition"
+          className="mt-4 block cursor-pointer rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 p-5 transition hover:border-emerald-500 hover:bg-emerald-50"
         >
           {previewURL ? (
             <img
               src={previewURL}
               alt="Preview"
-              className="rounded-lg mx-auto max-h-48 object-contain"
+              className="mx-auto max-h-52 w-full rounded-xl object-contain"
             />
           ) : (
-            <p className="text-gray-500">Drag & drop or click to upload</p>
+            <p className="rounded-xl bg-white px-3 py-16 text-center text-sm text-slate-600">Drag and drop or click to upload</p>
           )}
           <input
             id="fileInput"
@@ -265,7 +301,7 @@ const UploadPage = () => {
               value={weightKg}
               onChange={(e) => setWeightKg(e.target.value)}
               placeholder="e.g., 1.2"
-              className="w-full border border-green-200 rounded-lg p-2 text-sm"
+              className="w-full rounded-xl border border-emerald-200 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500"
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -274,7 +310,7 @@ const UploadPage = () => {
               <select
                 value={fragile}
                 onChange={(e) => setFragile(e.target.value)}
-                className="w-full border border-green-200 rounded-lg p-2 text-sm"
+                className="w-full rounded-xl border border-emerald-200 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500"
               >
                 <option value="no">No</option>
                 <option value="yes">Yes</option>
@@ -285,7 +321,7 @@ const UploadPage = () => {
               <select
                 value={moistureSensitive}
                 onChange={(e) => setMoistureSensitive(e.target.value)}
-                className="w-full border border-green-200 rounded-lg p-2 text-sm"
+                className="w-full rounded-xl border border-emerald-200 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500"
               >
                 <option value="no">No</option>
                 <option value="yes">Yes</option>
@@ -298,7 +334,7 @@ const UploadPage = () => {
               <select
                 value={shippingDistance}
                 onChange={(e) => setShippingDistance(e.target.value)}
-                className="w-full border border-green-200 rounded-lg p-2 text-sm"
+                className="w-full rounded-xl border border-emerald-200 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500"
               >
                 <option value="local">Local</option>
                 <option value="regional">Regional</option>
@@ -310,7 +346,7 @@ const UploadPage = () => {
               <select
                 value={budgetPriority}
                 onChange={(e) => setBudgetPriority(e.target.value)}
-                className="w-full border border-green-200 rounded-lg p-2 text-sm"
+                className="w-full rounded-xl border border-emerald-200 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500"
               >
                 <option value="balanced">Balanced</option>
                 <option value="low_cost">Low Cost</option>
@@ -323,20 +359,36 @@ const UploadPage = () => {
         <button
           onClick={handleUpload}
           disabled={loading}
-          className={`mt-6 px-6 py-2 rounded-xl text-white font-medium transition-all duration-300 ${
+          className={`mt-6 w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
             loading
-              ? "bg-green-400 cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-700"
+              ? "cursor-not-allowed bg-emerald-300"
+              : "bg-emerald-700 hover:bg-emerald-800"
           }`}
         >
-          {loading ? "Analyzing..." : "Upload & Classify"}
+          {loading ? "Analyzing..." : "Upload and Classify"}
         </button>
 
-        {error && <p className="mt-4 text-red-500 text-sm">{error}</p>}
+        {error && (
+          <p className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            {error}
+          </p>
+        )}
+      </section>
+
+      <section className="lg:col-span-8 space-y-6 text-left">
+
+        {!result && (
+          <div className="rounded-2xl border border-dashed border-emerald-200 bg-white/80 p-8 text-center">
+            <h3 className="text-xl font-semibold text-emerald-900">No analysis yet</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Upload an image on the left and click Upload and Classify to generate recommendations.
+            </p>
+          </div>
+        )}
 
         {result && (
-          <div className="mt-8 bg-green-50 rounded-xl p-6 text-left shadow-inner">
-            <h3 className="text-xl font-semibold text-green-700 mb-2">
+          <div className="rounded-2xl border border-emerald-100 bg-white p-5 text-left shadow-sm sm:p-6">
+            <h3 className="text-2xl font-semibold text-emerald-800 mb-2">
               {result.product_type}
             </h3>
             <p className="text-gray-700 mb-4">
@@ -458,43 +510,19 @@ const UploadPage = () => {
 
             {Array.isArray(result.vendor_options) && result.vendor_options.length > 0 && (
               <div className="mb-5">
-                <h4 className="font-semibold text-green-700 mb-2">Available Vendors</h4>
-                <div className="space-y-3">
-                  {result.vendor_options.map((vendor) => (
-                    <div key={vendor.vendor_id} className="rounded-lg border border-green-100 bg-white p-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="font-semibold text-sm text-green-800">{vendor.name}</p>
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                          {vendor.rating} / 5
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-700">
-                        MOQ: {vendor.min_order_qty} | Lead Time: {vendor.lead_time_days} days
-                      </p>
-                      <p className="text-xs text-gray-700">
-                        Regions: {(vendor.service_regions || []).join(", ")}
-                      </p>
-                      {Array.isArray(vendor.matched_materials) && vendor.matched_materials.length > 0 && (
-                        <p className="text-xs text-emerald-700 mt-1">
-                          Matched: {vendor.matched_materials.join(", ")}
-                        </p>
-                      )}
-                      <div className="mt-2 flex gap-3 text-xs">
-                        <a
-                          href={vendor.website}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-emerald-700 hover:underline"
-                        >
-                          Website
-                        </a>
-                        <a href={`mailto:${vendor.email}`} className="text-emerald-700 hover:underline">
-                          Email
-                        </a>
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="font-semibold text-green-700">Available Vendors</h4>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/vendors")}
+                    className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100"
+                  >
+                    View Vendors ({result.vendor_options.length})
+                  </button>
                 </div>
+                <p className="mt-2 text-xs text-gray-600">
+                  Open the Vendors page to browse all details in a dedicated view.
+                </p>
               </div>
             )}
 
@@ -586,67 +614,31 @@ const UploadPage = () => {
           </div>
         )}
 
-        <div className="mt-8 bg-white border border-green-100 rounded-xl p-4 text-left">
-          <h3 className="text-lg font-semibold text-green-700 mb-2">Recent Prediction History</h3>
+        <div className="rounded-2xl border border-emerald-100 bg-white p-5 text-left shadow-sm sm:p-6">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-xl font-semibold text-emerald-800">Recent Prediction History</h3>
+            <button
+              type="button"
+              onClick={() => navigate("/history")}
+              className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100"
+            >
+              View History
+            </button>
+          </div>
           {historySummary && (
-            <p className="text-xs text-gray-600 mb-3">
+            <p className="text-xs text-gray-600 mt-2">
               Total: {historySummary.total_predictions} | Avg Confidence:{" "}
               {((historySummary.average_confidence || 0) * 100).toFixed(1)}% | Uncertain:{" "}
               {historySummary.uncertain_predictions}
             </p>
           )}
-          <div className="flex gap-2 mb-3">
-            <button
-              type="button"
-              onClick={() => setHistoryFilter("all")}
-              className={`px-2 py-1 text-xs rounded ${
-                historyFilter === "all" ? "bg-green-600 text-white" : "bg-green-100 text-green-800"
-              }`}
-            >
-              All
-            </button>
-            <button
-              type="button"
-              onClick={() => setHistoryFilter("uncertain")}
-              className={`px-2 py-1 text-xs rounded ${
-                historyFilter === "uncertain"
-                  ? "bg-amber-500 text-white"
-                  : "bg-amber-100 text-amber-800"
-              }`}
-            >
-              Uncertain
-            </button>
-            <button
-              type="button"
-              onClick={() => setHistoryFilter("high_confidence")}
-              className={`px-2 py-1 text-xs rounded ${
-                historyFilter === "high_confidence"
-                  ? "bg-emerald-600 text-white"
-                  : "bg-emerald-100 text-emerald-800"
-              }`}
-            >
-              High Confidence
-            </button>
-          </div>
-          {filteredHistoryItems.length === 0 ? (
-            <p className="text-sm text-gray-500">No predictions yet.</p>
-          ) : (
-            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-              {filteredHistoryItems.map((item, idx) => (
-                <div key={`${item.timestamp_utc}-${idx}`} className="border border-green-100 rounded-lg p-2">
-                  <p className="text-sm font-medium text-green-800">
-                    {item.product_type} ({((item.prediction_accuracy || 0) * 100).toFixed(1)}%)
-                  </p>
-                  <p className="text-xs text-gray-600 truncate">File: {item.uploaded_file || "N/A"}</p>
-                  <p className="text-xs text-gray-500">
-                    {item.timestamp_utc ? new Date(item.timestamp_utc).toLocaleString() : "-"}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
+          <p className="mt-2 text-xs text-gray-600">
+            Open the History page for filters and full prediction records.
+          </p>
         </div>
-      </div>
+      </section>
+    </div>
+  </div>
     </div>
   );
 };
