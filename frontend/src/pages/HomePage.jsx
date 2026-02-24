@@ -38,7 +38,7 @@ const HomePage = () => {
                     <ul className="hidden md:flex space-x-8 text-green-700 font-semibold">
                         <li className="hover:text-green-900 cursor-pointer transition" onClick={() => scrollToSection("hero")}>Home</li>
                         <li className="hover:text-green-900 cursor-pointer transition" onClick={() => scrollToSection("about")}>About</li>
-                        <li className="hover:text-green-900 cursor-pointer transition" onClick={() => navigate("/login")}>Login/SignUp</li>
+                        {/* <li className="hover:text-green-900 cursor-pointer transition" onClick={() => navigate("/login")}>Login/SignUp</li> */}
                         <li className="hover:text-green-900 cursor-pointer transition" onClick={() => navigate("/upload")}>Upload</li>
 
                     </ul>
@@ -55,7 +55,7 @@ const HomePage = () => {
                     <div className="md:hidden bg-green-50 shadow-md px-4 py-4 flex flex-col space-y-4 text-green-700 font-semibold">
                         <li onClick={() => scrollToSection("hero")} className="cursor-pointer hover:text-green-900">Home</li>
                         <li onClick={() => scrollToSection("about")} className="cursor-pointer hover:text-green-900">About</li>
-                        <li className="cursor-pointer hover:text-green-900">Login/Signup</li>
+                        {/* <li className="cursor-pointer hover:text-green-900">Login/Signup</li> */}
                     </div>
                 )}
             </nav>
